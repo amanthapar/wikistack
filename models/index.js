@@ -10,6 +10,13 @@ const Page = db.define('page', {
   status: Sequelize.ENUM('open', 'closed'),
 });
 
+Page.beforeValidate(page => {
+  page.slug = page.title
+    .replace(/\s+/g, '_')
+    .replace(/\W/g, '')
+    .toLowerCase();
+});
+
 const User = db.define('user', {
   name: { type: Sequelize.STRING, allowNull: false },
   email: {
