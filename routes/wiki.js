@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { addPage, wikiPage, main } = require('../views');
-const { Page } = require('../models');
+const { Page, User } = require('../models');
 
 router.get('/', async (req, res, next) => {
   const pages = await Page.findAll();
@@ -8,9 +8,12 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-  // STUDENT ASSIGNMENT:
-  // add definitions for `title` and `content`
-  const { title, content, status } = req.body;
+  const { title, content, status, name, email } = req.body;
+
+  const [user] = await User.findOrCreate({
+    where: { email },
+    defaults: { name },
+  });
 
   const page = new Page({
     title,
@@ -20,7 +23,8 @@ router.post('/', async (req, res, next) => {
 
   try {
     const { slug } = await page.save();
-    console.log(slug);
+
+    await page.setAuthor(user);
     res.redirect(`/wiki/${slug}`);
   } catch (error) {
     next(error);
@@ -39,7 +43,7 @@ router.get('/:slug', async (req, res, next) => {
         slug,
       },
     });
-    res.send(wikiPage(page, null));
+    res.send(wikiPage(page, await page.getAuthor()));
   } catch (err) {
     next(err);
   }

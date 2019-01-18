@@ -11,7 +11,7 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // parses url-encoded bodies
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 // parses json bodies
 app.use(express.json());
@@ -21,12 +21,12 @@ app.get('/', (req, res, next) => {
 });
 
 app.use('/wiki', wikiRoutes);
-app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 
 const init = async () => {
   // await Page.sync();
   // await User.sync();
-  await db.sync();
+  await db.sync({ force: true });
 
   app.listen(3000, () => {
     console.log('Listening on Port 3000');
